@@ -7,6 +7,16 @@ import { newAccountId, newBudgetId, newCategoryId, newRecordId, newRuleId, newSu
 const NS = 'smart-ledger';
 const KEY = `${NS}:state`;
 
+// 空账本初始状态：保留账户/分类/设置等记账基础设施，账户余额归零，不带任何收支、预算、订阅与规则数据
+const EMPTY_STATE: IAppState = {
+  ...SEED,
+  accounts: SEED.accounts.map((a) => ({ ...a, balance: 0 })),
+  records: [],
+  budgets: [],
+  subscriptions: [],
+  rules: [],
+};
+
 function loadInitial(): IAppState {
   try {
     const raw = localStorage.getItem(KEY);
@@ -17,9 +27,9 @@ function loadInitial(): IAppState {
       }
     }
   } catch {
-    /* 隐私模式等场景静默回退到示例数据 */
+    /* 隐私模式等场景静默回退到空账本 */
   }
-  return SEED;
+  return EMPTY_STATE;
 }
 
 function clone(state: IAppState): IAppState {
@@ -145,7 +155,7 @@ export default function AppProvider({ children }: { children: React.ReactNode })
       setState(SEED);
     },
     clearAll() {
-      setState({ ...SEED, records: [], budgets: [], subscriptions: [], rules: [] });
+      setState(EMPTY_STATE);
     },
   };
 
